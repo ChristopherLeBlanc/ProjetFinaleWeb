@@ -1,0 +1,33 @@
+﻿@model ProjetFinalWeb.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Connexion";
+}
+
+<h2>Connexion</h2>
+
+<form asp-controller="Account" asp-action="Login" method="post">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Identifiant"></label>
+        <input asp-for="Identifiant" class="form-control" />
+        <span asp-validation-for="Identifiant" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="MotDePasse"></label>
+        <input asp-for="MotDePasse" type="password" class="form-control" />
+        <span asp-validation-for="MotDePasse" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Se connecter
+    </button>
+
+</form>
