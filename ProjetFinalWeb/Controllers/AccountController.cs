@@ -1,23 +1,25 @@
 ﻿
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using ProjetFinalWeb.Models;
 using ProjetFinalWeb.ViewModels;
 
-[AllowAnonymous]
 public class AccountController : Controller
 {
-    private readonly FilmsDbContext _db;
+    private readonly UserManager<Utilisateur> _userManager;
+    private readonly SignInManager<Utilisateur> _signInManager;
 
-    public AccountController(FilmsDbContext db)
+    public AccountController(
+        UserManager<Utilisateur> userManager,
+        SignInManager<Utilisateur> signInManager)
     {
-        _db = db;
+        _userManager = userManager;
+        _signInManager = signInManager;
     }
 
+    [AllowAnonymous]
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
@@ -25,6 +27,7 @@ public class AccountController : Controller
         return View();
     }
 
+    [AllowAnonymous]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(
@@ -37,13 +40,21 @@ public class AccountController : Controller
             return View(model);
         }
 
-        Utilisateur? utilisateur = await _db.Utilisateurs
-            .FirstOrDefaultAsync(u =>
-                u.NomUtilisateur == model.Identifiant ||
-                u.Courriel == model.Identifiant);
+        Utilisateur? utilisateur = null;
 
-        if (utilisateur == null ||
-            utilisateur.MotPasse.ToString() != model.MotDePasse)
+        string identifiant = model.Identifiant.Trim();
+
+        // verifie le nom d'util
+        utilisateur = await _userManager.FindByNameAsync(identifiant);
+
+        // verifie l'email
+        if (utilisateur == null)
+        {
+            utilisateur = await _userManager.FindByEmailAsync(identifiant);
+        }
+
+        // verifie que l'util existe
+        if (utilisateur == null)
         {
             ModelState.AddModelError("",
                 "Identifiant ou mot de passe incorrect.");
@@ -52,7 +63,23 @@ public class AccountController : Controller
             return View(model);
         }
 
-        var role = utilisateur.TypeUtilisateur switch
+        // checker le mot de passe
+        var resultat = await _signInManager.CheckPasswordSignInAsync(
+            utilisateur,
+            model.MotDePasse,
+            lockoutOnFailure: false);
+
+        if (!resultat.Succeeded)
+        {
+            ModelState.AddModelError("",
+                "Identifiant ou mot de passe incorrect.");
+
+            ViewBag.ReturnUrl = returnUrl;
+            return View(model);
+        }
+
+        // Déterminer le type
+        string role = utilisateur.TypeUtilisateur switch
         {
             "A" => "Administrateur",
             "S" => "SuperUtilisateur",
@@ -60,30 +87,19 @@ public class AccountController : Controller
             _ => "Utilisateur"
         };
 
+        // Ajouter le rôle
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier,
-                utilisateur.NoUtilisateur.ToString()),
-
-            new Claim(ClaimTypes.Name,
-                utilisateur.NomUtilisateur),
-
-            new Claim(ClaimTypes.Email,
-                utilisateur.Courriel),
-
             new Claim(ClaimTypes.Role, role)
         };
 
-        var identity = new ClaimsIdentity(
-            claims,
-            CookieAuthenticationDefaults.AuthenticationScheme);
+        // Connecter l'utilisateur avec Identity
+        await _signInManager.SignInWithClaimsAsync(
+            utilisateur,
+            isPersistent: false,
+            claims);
 
-        var principal = new ClaimsPrincipal(identity);
-
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            principal);
-
+        // Redirection
         if (!string.IsNullOrEmpty(returnUrl) &&
             Url.IsLocalUrl(returnUrl))
         {
@@ -98,8 +114,7 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
-        await HttpContext.SignOutAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme);
+        await _signInManager.SignOutAsync();
 
         return RedirectToAction("Login", "Account");
     }
