@@ -1,0 +1,105 @@
+@model ProjetFinalWeb.ViewModels.FilmsListeViewModel
+
+@{
+    ViewData["Title"] = "DVDs de tous les utilisateurs";
+    bool rechercheActive = !string.IsNullOrWhiteSpace(Model.Recherche);
+}
+
+<h2>DVDs de tous les utilisateurs</h2>
+
+<form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-4">
+        <label for="tri" class="form-label">Trier par</label>
+        <select id="tri" name="tri" class="form-select" onchange="this.form.submit()"
+                title="Choisissez l'ordre d'affichage des DVDs">
+            <option value="titre" selected="@(Model.Tri == "titre")">Titre français</option>
+            <option value="nom" selected="@(Model.Tri == "nom")">Nom d'utilisateur</option>
+            <option value="nom-titre" selected="@(Model.Tri == "nom-titre")">Nom d'utilisateur, puis titre</option>
+        </select>
+    </div>
+    <div class="col-md-5">
+        <label for="recherche" class="form-label">Rechercher un titre</label>
+        <input id="recherche" name="recherche" value="@Model.Recherche" class="form-control"
+               placeholder="Partie du titre français ou original" />
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Rechercher</button>
+        @if (rechercheActive)
+        {
+            <a asp-action="Index" asp-route-tri="@Model.Tri" class="btn btn-secondary">Retour</a>
+        }
+    </div>
+</form>
+
+<p class="text-muted">
+    @Model.Total DVD(s)
+    @if (rechercheActive) { <span>pour « @Model.Recherche »</span> }
+    — page @Model.Page de @Model.NbPages
+</p>
+
+@if (!Model.Films.Any())
+{
+    <div class="alert alert-info">Aucun DVD trouvé.</div>
+}
+else
+{
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+        @foreach (var f in Model.Films)
+        {
+            <div class="col">
+                <div class="card h-100 @(f.EstEnMain ? "border-primary" : "")">
+                    <img src="@Url.Content(string.IsNullOrEmpty(f.ImagePochette) ? "~/images/pochette-defaut.svg" : f.ImagePochette)"
+                         class="card-img-top pochette" alt="Pochette de @f.TitreFrancais" />
+                    <div class="card-body">
+                        <h6 class="card-title">@f.Numero. @f.TitreFrancais</h6>
+                        <p class="card-text small text-muted mb-0">
+                            En main : <strong>@f.NomEmprunteur</strong>
+                            @if (f.EstEnMain) { <span class="badge bg-primary">Moi</span> }
+                        </p>
+                    </div>
+                    <div class="card-footer d-flex flex-wrap gap-1">
+                        <a asp-action="Details" asp-route-id="@f.NoExemplaire" class="btn btn-sm btn-outline-secondary"
+                           title="Afficher les données détaillées">Détails</a>
+                        @if (f.EstEnMain)
+                        {
+                            <a asp-action="Modifier" asp-route-id="@f.NoExemplaire" class="btn btn-sm btn-outline-primary"
+                               title="Modifier ce DVD">Modifier</a>
+                            <a asp-action="Supprimer" asp-route-id="@f.NoExemplaire" class="btn btn-sm btn-outline-danger"
+                               title="Supprimer ce DVD">Supprimer</a>
+                        }
+                        else
+                        {
+                            <a asp-action="Courriel" asp-route-id="@f.NoExemplaire" class="btn btn-sm btn-outline-primary"
+                               title="Envoyer un courriel à @f.NomEmprunteur">Courriel</a>
+                            <a asp-action="Appropriation" asp-route-id="@f.NoExemplaire" class="btn btn-sm btn-outline-success"
+                               title="Indiquer que vous avez maintenant ce DVD en main">M'approprier</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Model.NbPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)"
+                       asp-route-tri="@Model.Tri" asp-route-recherche="@Model.Recherche">Précédent</a>
+                </li>
+                @for (int p = 1; p <= Model.NbPages; p++)
+                {
+                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@p"
+                           asp-route-tri="@Model.Tri" asp-route-recherche="@Model.Recherche">@p</a>
+                    </li>
+                }
+                <li class="page-item @(Model.Page == Model.NbPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)"
+                       asp-route-tri="@Model.Tri" asp-route-recherche="@Model.Recherche">Suivant</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}

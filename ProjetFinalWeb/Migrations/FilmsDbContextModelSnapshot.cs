@@ -155,6 +155,143 @@ namespace ProjetFinalWeb.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ProjetFinalWeb.Models.Categorie", b =>
+                {
+                    b.Property<int>("NoCategorie")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("NoCategorie");
+
+                    b.ToTable("Categories", (string)null);
+                });
+
+            modelBuilder.Entity("ProjetFinalWeb.Models.EmpruntFilm", b =>
+                {
+                    b.Property<int>("NoExemplaire")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NoUtilisateur")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateEmprunt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("NoExemplaire", "NoUtilisateur");
+
+                    b.HasIndex("NoUtilisateur");
+
+                    b.ToTable("EmpruntsFilms", (string)null);
+                });
+
+            modelBuilder.Entity("ProjetFinalWeb.Models.Exemplaire", b =>
+                {
+                    b.Property<int>("NoExemplaire")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NoUtilisateurProprietaire")
+                        .HasColumnType("int");
+
+                    b.HasKey("NoExemplaire");
+
+                    b.HasIndex("NoUtilisateurProprietaire");
+
+                    b.ToTable("Exemplaires", (string)null);
+                });
+
+            modelBuilder.Entity("ProjetFinalWeb.Models.Film", b =>
+                {
+                    b.Property<int>("NoFilm")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AnneeSortie")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Categorie")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DateMAJ")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DureeMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("FilmOriginal")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("Format")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImagePochette")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("NbDisques")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("NoProducteur")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("NoRealisateur")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("NoUtilisateurMAJ")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Resume")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TitreFrancais")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TitreOriginal")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool?>("VersionEtendue")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Xtra")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("NoFilm");
+
+                    b.HasIndex("Categorie");
+
+                    b.HasIndex("Format");
+
+                    b.HasIndex("NoProducteur");
+
+                    b.HasIndex("NoRealisateur");
+
+                    b.HasIndex("NoUtilisateurMAJ");
+
+                    b.ToTable("Films", (string)null);
+                });
+
+            modelBuilder.Entity("ProjetFinalWeb.Models.Format", b =>
+                {
+                    b.Property<int>("NoFormat")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("NoFormat");
+
+                    b.ToTable("Formats", (string)null);
+                });
+
             modelBuilder.Entity("ProjetFinalWeb.Models.Preference", b =>
                 {
                     b.Property<int>("NoPreference")
@@ -169,6 +306,36 @@ namespace ProjetFinalWeb.Migrations
                     b.HasKey("NoPreference");
 
                     b.ToTable("Preferences", (string)null);
+                });
+
+            modelBuilder.Entity("ProjetFinalWeb.Models.Producteur", b =>
+                {
+                    b.Property<int>("NoProducteur")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("NoProducteur");
+
+                    b.ToTable("Producteurs", (string)null);
+                });
+
+            modelBuilder.Entity("ProjetFinalWeb.Models.Realisateur", b =>
+                {
+                    b.Property<int>("NoRealisateur")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("NoRealisateur");
+
+                    b.ToTable("Realisateurs", (string)null);
                 });
 
             modelBuilder.Entity("ProjetFinalWeb.Models.TypeUtilisateur", b =>
@@ -358,6 +525,74 @@ namespace ProjetFinalWeb.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ProjetFinalWeb.Models.EmpruntFilm", b =>
+                {
+                    b.HasOne("ProjetFinalWeb.Models.Exemplaire", "Exemplaire")
+                        .WithMany("Emprunts")
+                        .HasForeignKey("NoExemplaire")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProjetFinalWeb.Models.Utilisateur", "Utilisateur")
+                        .WithMany()
+                        .HasForeignKey("NoUtilisateur")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Exemplaire");
+
+                    b.Navigation("Utilisateur");
+                });
+
+            modelBuilder.Entity("ProjetFinalWeb.Models.Exemplaire", b =>
+                {
+                    b.HasOne("ProjetFinalWeb.Models.Utilisateur", "Proprietaire")
+                        .WithMany()
+                        .HasForeignKey("NoUtilisateurProprietaire")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Proprietaire");
+                });
+
+            modelBuilder.Entity("ProjetFinalWeb.Models.Film", b =>
+                {
+                    b.HasOne("ProjetFinalWeb.Models.Categorie", "CategorieInfo")
+                        .WithMany()
+                        .HasForeignKey("Categorie")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ProjetFinalWeb.Models.Format", "FormatInfo")
+                        .WithMany()
+                        .HasForeignKey("Format")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ProjetFinalWeb.Models.Producteur", "Producteur")
+                        .WithMany()
+                        .HasForeignKey("NoProducteur")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ProjetFinalWeb.Models.Realisateur", "Realisateur")
+                        .WithMany()
+                        .HasForeignKey("NoRealisateur")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ProjetFinalWeb.Models.Utilisateur", "UtilisateurMAJ")
+                        .WithMany()
+                        .HasForeignKey("NoUtilisateurMAJ")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CategorieInfo");
+
+                    b.Navigation("FormatInfo");
+
+                    b.Navigation("Producteur");
+
+                    b.Navigation("Realisateur");
+
+                    b.Navigation("UtilisateurMAJ");
+                });
+
             modelBuilder.Entity("ProjetFinalWeb.Models.Utilisateur", b =>
                 {
                     b.HasOne("ProjetFinalWeb.Models.TypeUtilisateur", "Type")
@@ -405,6 +640,11 @@ namespace ProjetFinalWeb.Migrations
                     b.Navigation("Preference");
 
                     b.Navigation("Utilisateur");
+                });
+
+            modelBuilder.Entity("ProjetFinalWeb.Models.Exemplaire", b =>
+                {
+                    b.Navigation("Emprunts");
                 });
 
             modelBuilder.Entity("ProjetFinalWeb.Models.TypeUtilisateur", b =>

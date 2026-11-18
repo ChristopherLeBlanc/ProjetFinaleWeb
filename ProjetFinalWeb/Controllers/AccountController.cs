@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -44,16 +44,13 @@ public class AccountController : Controller
 
         string identifiant = model.Identifiant.Trim();
 
-        // verifie le nom d'util
         utilisateur = await _userManager.FindByNameAsync(identifiant);
 
-        // verifie l'email
         if (utilisateur == null)
         {
             utilisateur = await _userManager.FindByEmailAsync(identifiant);
         }
 
-        // verifie que l'util existe
         if (utilisateur == null)
         {
             ModelState.AddModelError("",
@@ -63,7 +60,6 @@ public class AccountController : Controller
             return View(model);
         }
 
-        // checker le mot de passe
         var resultat = await _signInManager.CheckPasswordSignInAsync(
             utilisateur,
             model.MotDePasse,
@@ -78,7 +74,6 @@ public class AccountController : Controller
             return View(model);
         }
 
-        // Déterminer le type
         string role = utilisateur.TypeUtilisateur switch
         {
             "A" => "Administrateur",
@@ -87,26 +82,23 @@ public class AccountController : Controller
             _ => "Utilisateur"
         };
 
-        // Ajouter le rôle
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Role, role)
         };
 
-        // Connecter l'utilisateur avec Identity
         await _signInManager.SignInWithClaimsAsync(
             utilisateur,
             isPersistent: false,
             claims);
 
-        // Redirection
         if (!string.IsNullOrEmpty(returnUrl) &&
             Url.IsLocalUrl(returnUrl))
         {
             return Redirect(returnUrl);
         }
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Films");
     }
 
     [Authorize]
