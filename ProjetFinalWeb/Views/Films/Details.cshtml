@@ -2,6 +2,25 @@
 
 @{
     ViewData["Title"] = "Détails du DVD";
+
+    var acteurs = (List<string>)ViewBag.Acteurs;
+    var supplements = (List<string>)ViewBag.Supplements;
+    var langues = (List<string>)ViewBag.Langues;
+    var sousTitres = (List<string>)ViewBag.SousTitres;
+    var proprietaire = (ProjetFinalWeb.Models.Utilisateur?)ViewBag.Proprietaire;
+    var detenteur = (ProjetFinalWeb.Models.Utilisateur?)ViewBag.Detenteur;
+
+    string NonRenseigne = "Non renseigné";
+
+    string OuiNon(bool? valeur) =>
+        valeur == null ? NonRenseigne : (valeur.Value ? "Oui" : "Non");
+
+    string Liste(List<string> items) =>
+        items.Any() ? string.Join(", ", items) : NonRenseigne;
+
+    string cheminImage = string.IsNullOrEmpty(Model.ImagePochette)
+        ? "~/images/pochette-defaut.svg"
+        : "~/images/" + Model.ImagePochette;
 }
 
 <h2>Détails du DVD</h2>
@@ -10,67 +29,123 @@
 
     <div class="row">
 
-        <div class="col-md-4">
-
-            @if (!string.IsNullOrEmpty(Model.ImagePochette))
-            {
-                <img src="@Model.ImagePochette"
-                     class="img-fluid rounded"
-                     alt="@Model.Titre" />
-            }
-
+        <!-- Pochette -->
+        <div class="col-md-4 mb-3">
+            <img src="@Url.Content(cheminImage)"
+                 class="img-fluid rounded"
+                 alt="Pochette de @Model.Titre"
+                 onerror="this.onerror=null;this.src='/images/pochette-defaut.svg';" />
         </div>
 
         <div class="col-md-8">
 
             <h3>@Model.Titre</h3>
 
-            @if (!string.IsNullOrEmpty(Model.TitreOriginal))
-            {
-                <p>
-                    <strong>Titre original :</strong>
-                    @Model.TitreOriginal
-                </p>
-            }
+            <dl class="row">
 
-            <p>
-                <strong>Numéro du DVD :</strong>
-                @ViewBag.NoExemplaire
-            </p>
+                <dt class="col-sm-5">Titre original</dt>
+                <dd class="col-sm-7">@(string.IsNullOrEmpty(Model.TitreOriginal) ? NonRenseigne : Model.TitreOriginal)</dd>
 
-            <p>
-                <strong>Année de sortie :</strong>
-                @(Model.AnneeSortie?.ToString() ?? "Non renseignée")
-            </p>
+                <dt class="col-sm-5">Numéro du DVD</dt>
+                <dd class="col-sm-7">@ViewBag.NoExemplaire</dd>
 
-            <p>
-                <strong>Durée :</strong>
-                @(Model.DureeMinutes.HasValue
-                    ? Model.DureeMinutes + " minutes"
-                    : "Non renseignée")
-            </p>
+                <dt class="col-sm-5">Année de sortie</dt>
+                <dd class="col-sm-7">@(Model.AnneeSortie?.ToString() ?? NonRenseigne)</dd>
 
-            <p>
-                <strong>Nombre de disques :</strong>
-                @(Model.NbDisques?.ToString() ?? "Non renseigné")
-            </p>
+                <dt class="col-sm-5">Catégorie</dt>
+                <dd class="col-sm-7">@(Model.CategorieInfo?.Description ?? NonRenseigne)</dd>
 
-            <p>
-                <strong>Résumé :</strong>
-                @(Model.Resume ?? "Aucun résumé disponible")
-            </p>
+                <dt class="col-sm-5">Durée</dt>
+                <dd class="col-sm-7">@(Model.DureeMinutes.HasValue ? Model.DureeMinutes + " minutes" : NonRenseigne)</dd>
+
+                <dt class="col-sm-5">Format</dt>
+                <dd class="col-sm-7">@(Model.FormatInfo?.Description ?? NonRenseigne)</dd>
+
+                <dt class="col-sm-5">Nombre de disques</dt>
+                <dd class="col-sm-7">@(Model.NbDisques?.ToString() ?? NonRenseigne)</dd>
+
+                <dt class="col-sm-5">Langue</dt>
+                <dd class="col-sm-7">@Liste(langues)</dd>
+
+                <dt class="col-sm-5">Sous-titres</dt>
+                <dd class="col-sm-7">@Liste(sousTitres)</dd>
+
+                <dt class="col-sm-5">DVD original ?</dt>
+                <dd class="col-sm-7">@OuiNon(Model.FilmOriginal)</dd>
+
+                <dt class="col-sm-5">Version étendue ?</dt>
+                <dd class="col-sm-7">@OuiNon(Model.VersionEtendue)</dd>
+
+            </dl>
 
             <hr />
 
-            <h5>Détenteur actuel</h5>
+            <dl class="row">
 
-            @if (ViewBag.Detenteur != null)
-            {
-                <p>
-                    <strong>Utilisateur :</strong>
-                    @ViewBag.Detenteur.UserName
-                </p>
-            }
+                <dt class="col-sm-5">Réalisateur</dt>
+                <dd class="col-sm-7">@(Model.Realisateur?.Nom ?? NonRenseigne)</dd>
+
+                <dt class="col-sm-5">Producteur</dt>
+                <dd class="col-sm-7">@(Model.Producteur?.Nom ?? NonRenseigne)</dd>
+
+                <dt class="col-sm-5">Acteurs principaux</dt>
+                <dd class="col-sm-7">@Liste(acteurs)</dd>
+
+                <dt class="col-sm-5">Suppléments</dt>
+                <dd class="col-sm-7">
+                    @if (supplements.Any())
+                    {
+                        <ul class="mb-0 ps-3">
+                            @foreach (var s in supplements)
+                            {
+                                <li>@s</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        @NonRenseigne
+                    }
+                </dd>
+
+                <dt class="col-sm-5">Résumé</dt>
+                <dd class="col-sm-7">@(string.IsNullOrEmpty(Model.Resume) ? "Aucun résumé disponible" : Model.Resume)</dd>
+
+                <dt class="col-sm-5">Fiche du film</dt>
+                <dd class="col-sm-7">
+                    @if (Uri.TryCreate(Model.Xtra, UriKind.Absolute, out var lienFiche)
+                         && (lienFiche.Scheme == Uri.UriSchemeHttp || lienFiche.Scheme == Uri.UriSchemeHttps))
+                    {
+                        <a href="@lienFiche.AbsoluteUri" target="_blank" rel="noopener noreferrer"
+                           title="Ouvrir la fiche du film dans un nouvel onglet">
+                            Ouvrir la fiche du film
+                        </a>
+                    }
+                    else
+                    {
+                        @NonRenseigne
+                    }
+                </dd>
+
+            </dl>
+
+            <hr />
+
+            <dl class="row">
+
+                <dt class="col-sm-5">Propriétaire (acheteur)</dt>
+                <dd class="col-sm-7">@(proprietaire?.UserName ?? NonRenseigne)</dd>
+
+                <dt class="col-sm-5">Détenteur (en main)</dt>
+                <dd class="col-sm-7">@(detenteur?.UserName ?? NonRenseigne)</dd>
+
+                <dt class="col-sm-5">Dernière mise à jour le</dt>
+                <dd class="col-sm-7">@(Model.DateMAJ?.ToString("yyyy-MM-dd") ?? NonRenseigne)</dd>
+
+                <dt class="col-sm-5">Dernière mise à jour par</dt>
+                <dd class="col-sm-7">@(Model.UtilisateurMAJ?.UserName ?? NonRenseigne)</dd>
+
+            </dl>
 
         </div>
 
@@ -78,9 +153,11 @@
 
     <hr />
 
-    <a asp-action="Index"
-       class="btn btn-secondary">
-        Retour à la liste
-    </a>
+    <div>
+        <a asp-action="Index" class="btn btn-secondary"
+           title="Retourner à la liste des DVDs">
+            Retour à la liste des DVDs
+        </a>
+    </div>
 
 </div>

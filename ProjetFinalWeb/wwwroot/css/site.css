@@ -1,31 +1,232 @@
+/* ============================================================
+   CHARTE GRAPHIQUE - Gestion des DVDs
+   ============================================================ */
+
+:root {
+    --cine-nuit: #1b1f3b;
+    --cine-nuit-clair: #2a3060;
+    --cine-bordeaux: #8c1c2b;
+    --cine-bordeaux-fonce: #6e1521;
+    --cine-or: #e0a526;
+    --cine-creme: #f7f3ec;
+    --cine-texte: #2b2b33;
+    /* On redéfinit les couleurs de Bootstrap */
+    --bs-primary: #8c1c2b;
+    --bs-primary-rgb: 140, 28, 43;
+    --bs-link-color: #8c1c2b;
+    --bs-link-color-rgb: 140, 28, 43;
+    --bs-link-hover-color: #6e1521;
+    --bs-link-hover-color-rgb: 110, 21, 33;
+    --bs-body-bg: #f7f3ec;
+    --bs-body-color: #2b2b33;
+}
+
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.contenu {
+    flex: 1 0 auto;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* ---------- Titres ---------- */
+
+h2 {
+    color: var(--cine-nuit);
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    padding-bottom: .5rem;
+    border-bottom: 3px solid var(--cine-or);
+    display: inline-block;
+}
+
+h3, h5 {
+    color: var(--cine-nuit);
+}
+
+/* ---------- Barre de navigation ---------- */
+
+.navbar-cine {
+    background: linear-gradient(90deg, var(--cine-nuit), var(--cine-nuit-clair));
+    border-bottom: 3px solid var(--cine-or);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+}
+
+    .navbar-cine .navbar-brand {
+        color: var(--cine-or);
+        font-weight: 700;
+        letter-spacing: .5px;
+    }
+
+        .navbar-cine .navbar-brand:hover {
+            color: #fff;
+        }
+
+    .navbar-cine .nav-link {
+        color: rgba(255, 255, 255, .8);
+        transition: color .15s;
+    }
+
+        .navbar-cine .nav-link:hover,
+        .navbar-cine .nav-link:focus {
+            color: #fff;
+        }
+
+        .navbar-cine .nav-link.active {
+            color: var(--cine-or);
+            font-weight: 600;
+        }
+
+    .navbar-cine .navbar-text {
+        color: rgba(255, 255, 255, .85);
+    }
+
+.dropdown-menu {
+    border: 0;
+    border-top: 3px solid var(--cine-or);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .2);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: rgba(140, 28, 43, .1);
+    color: var(--cine-bordeaux);
+}
+
+.dropdown-item:active {
+    background-color: var(--cine-bordeaux);
+    color: #fff;
+}
+
+/* ---------- Boutons ---------- */
+
+.btn-primary {
+    --bs-btn-bg: var(--cine-bordeaux);
+    --bs-btn-border-color: var(--cine-bordeaux);
+    --bs-btn-hover-bg: var(--cine-bordeaux-fonce);
+    --bs-btn-hover-border-color: var(--cine-bordeaux-fonce);
+    --bs-btn-active-bg: var(--cine-bordeaux-fonce);
+    --bs-btn-active-border-color: var(--cine-bordeaux-fonce);
+    --bs-btn-disabled-bg: var(--cine-bordeaux);
+    --bs-btn-disabled-border-color: var(--cine-bordeaux);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--cine-bordeaux);
+    --bs-btn-border-color: var(--cine-bordeaux);
+    --bs-btn-hover-bg: var(--cine-bordeaux);
+    --bs-btn-hover-border-color: var(--cine-bordeaux);
+    --bs-btn-active-bg: var(--cine-bordeaux-fonce);
+    --bs-btn-active-border-color: var(--cine-bordeaux-fonce);
+}
+
+.btn-secondary {
+    --bs-btn-bg: var(--cine-nuit);
+    --bs-btn-border-color: var(--cine-nuit);
+    --bs-btn-hover-bg: var(--cine-nuit-clair);
+    --bs-btn-hover-border-color: var(--cine-nuit-clair);
+    --bs-btn-active-bg: var(--cine-nuit-clair);
+    --bs-btn-active-border-color: var(--cine-nuit-clair);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--cine-nuit);
+    --bs-btn-border-color: var(--cine-nuit);
+    --bs-btn-hover-bg: var(--cine-nuit);
+    --bs-btn-hover-border-color: var(--cine-nuit);
+    --bs-btn-active-bg: var(--cine-nuit-clair);
+    --bs-btn-active-border-color: var(--cine-nuit-clair);
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 .2rem rgba(224, 165, 38, .45);
+    border-color: var(--cine-or);
+}
+
+/* ---------- Cartes de DVD ---------- */
+
+.card {
+    border: 1px solid rgba(27, 31, 59, .12);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+}
+
+    .card.h-100 {
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+        .card.h-100:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(27, 31, 59, .18);
+        }
+
+    .card.border-primary {
+        border: 2px solid var(--cine-bordeaux);
+    }
+
+.card-title {
+    color: var(--cine-nuit);
+    font-weight: 600;
+}
+
+.card-footer {
+    background: transparent;
+    border-top: 1px solid rgba(27, 31, 59, .08);
+}
+
+/* Vignettes : format affiche de film (2:3) */
+.pochette {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    background: #e9ecef;
+}
+
+/* ---------- Pagination ---------- */
+
+.pagination {
+    --bs-pagination-color: var(--cine-bordeaux);
+    --bs-pagination-hover-color: var(--cine-bordeaux-fonce);
+    --bs-pagination-focus-color: var(--cine-bordeaux-fonce);
+    --bs-pagination-active-bg: var(--cine-bordeaux);
+    --bs-pagination-active-border-color: var(--cine-bordeaux);
+}
+
+/* ---------- Formulaires ---------- */
+
+.form-label {
+    font-weight: 600;
+    color: var(--cine-nuit);
+}
+
+/* ---------- Pied de page ---------- */
+
+.footer-cine {
+    flex-shrink: 0;
+    margin-top: 2rem;
+    padding: 1rem 0;
+    background: var(--cine-nuit);
+    border-top: 3px solid var(--cine-or);
+    color: rgba(255, 255, 255, .7);
+    text-align: center;
+    font-size: .9rem;
 }

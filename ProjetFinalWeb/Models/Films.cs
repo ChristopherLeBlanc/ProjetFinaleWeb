@@ -54,6 +54,10 @@ namespace ProjetFinalWeb.Models
         [Column("Producteur")]
         public int? NoProducteur { get; set; }
 
+        [StringLength(255)]
+        [Column("XTra")]
+        public string? Xtra { get; set; }
+
         // Relations
 
         [ForeignKey(nameof(Categorie))]

@@ -79,9 +79,10 @@ else
 
                 <div class="card h-100 @(f.EstEnMain ? "border-primary" : "")">
 
-                    <img src="@Url.Content(string.IsNullOrEmpty(f.ImagePochette) ? "~/images/pochette-defaut.svg" : f.ImagePochette)"
+                    <img src="@Url.Content(string.IsNullOrEmpty(f.ImagePochette) ? "~/images/pochette-defaut.svg" : "~/images/" + f.ImagePochette)"
                          class="card-img-top pochette"
-                         alt="Pochette de @f.Titre" />
+                         alt="Pochette de @f.Titre"
+                         onerror="this.onerror=null;this.src='/images/pochette-defaut.svg';" />
 
                     <div class="card-body">
 

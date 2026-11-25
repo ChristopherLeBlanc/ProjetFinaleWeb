@@ -4,30 +4,49 @@
     ViewData["Title"] = "Connexion";
 }
 
-<h2>Connexion</h2>
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6 col-lg-4">
 
-<form asp-controller="Account" asp-action="Login" method="post">
+        <div class="card shadow p-4">
 
-    @Html.AntiForgeryToken()
+            <div class="text-center mb-3">
+                
+                <h2 class="border-0 d-block mb-0 pb-0">Connexion</h2>
+                <p class="text-muted small mt-1">Gestion des DVDs</p>
+            </div>
 
-    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            <form asp-controller="Account" asp-action="Login" method="post">
 
-    <div asp-validation-summary="All" class="text-danger"></div>
+                @Html.AntiForgeryToken()
 
-    <div class="mb-3">
-        <label asp-for="Identifiant"></label>
-        <input asp-for="Identifiant" class="form-control" />
-        <span asp-validation-for="Identifiant" class="text-danger"></span>
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                <div asp-validation-summary="All" class="text-danger small"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Identifiant" class="form-label"></label>
+                    <input asp-for="Identifiant" class="form-control"
+                           placeholder="Prénom ou courriel"
+                           title="Entrez votre prénom ou votre adresse courriel"
+                           autofocus />
+                    <span asp-validation-for="Identifiant" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="MotDePasse" class="form-label"></label>
+                    <input asp-for="MotDePasse" type="password" class="form-control"
+                           placeholder="Votre mot de passe"
+                           title="Entrez votre mot de passe" />
+                    <span asp-validation-for="MotDePasse" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    Se connecter
+                </button>
+
+            </form>
+
+        </div>
+
     </div>
-
-    <div class="mb-3">
-        <label asp-for="MotDePasse"></label>
-        <input asp-for="MotDePasse" type="password" class="form-control" />
-        <span asp-validation-for="MotDePasse" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        Se connecter
-    </button>
-
-</form>
+</div>

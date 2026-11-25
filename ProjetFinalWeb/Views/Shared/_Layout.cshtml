@@ -1,4 +1,26 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@inject ProjetFinalWeb.Models.FilmsDbContext Db
+@{
+    bool connecte = User.Identity?.IsAuthenticated == true;
+    bool estAdmin = User.IsInRole("Administrateur");
+
+    string actionCourante = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    string controleurCourant = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+
+    // Liste des autres utilisateurs (pour le menu déroulant)
+    var autresUtilisateurs = new List<ProjetFinalWeb.Models.Utilisateur>();
+    if (connecte)
+    {
+        int idCourant = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        autresUtilisateurs = await Db.Utilisateurs
+            .Where(u => u.Id != idCourant && u.TypeUtilisateur != "A")
+            .OrderBy(u => u.UserName)
+            .ToListAsync();
+    }
+}
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="utf-8" />
@@ -10,31 +32,150 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-cine mb-4">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">Gestion des DVDs</a>
 
-                @if (User.Identity?.IsAuthenticated == true)
+                <a class="navbar-brand" asp-controller="Films" asp-action="Index">Gestion des DVDs</a>
+
+                @if (connecte)
                 {
-                    <div class="d-flex align-items-center ms-auto">
-                        <span class="navbar-text me-3">Connecté : <strong>@User.Identity.Name</strong></span>
-                        <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                            <button type="submit" class="btn btn-outline-light btn-sm">Déconnexion</button>
-                        </form>
+                    <button class="navbar-toggler" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#menuPrincipal"
+                            aria-controls="menuPrincipal" aria-expanded="false" aria-label="Afficher le menu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="menuPrincipal">
+
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                            <!-- Tous les DVDs (utilisateur et admin) -->
+                            <li class="nav-item">
+                                <a class="nav-link @(controleurCourant == "Films" && actionCourante == "Index" ? "active" : "")"
+                                   asp-controller="Films" asp-action="Index"
+                                   title="Afficher les DVDs de tous les utilisateurs">
+                                    Tous les DVDs
+                                </a>
+                            </li>
+
+                            @if (!estAdmin)
+                            {
+                                <!-- DVDs en main (pas pour l'admin) -->
+                                <li class="nav-item">
+                                    <a class="nav-link @(actionCourante == "EnMain" ? "active" : "")"
+                                       asp-controller="Films" asp-action="EnMain"
+                                       title="Afficher les DVDs que vous avez en main">
+                                        DVDs en main
+                                    </a>
+                                </li>
+                            }
+
+                            <!-- DVDs d'un autre utilisateur -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle @(actionCourante == "AutreUtilisateur" ? "active" : "")"
+                                   href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                   title="Choisir un utilisateur pour voir ses DVDs">
+                                    DVDs d'un utilisateur
+                                </a>
+                                <ul class="dropdown-menu">
+                                    @if (!autresUtilisateurs.Any())
+                                    {
+                                        <li><span class="dropdown-item-text text-muted">Aucun autre utilisateur</span></li>
+                                    }
+                                    @foreach (var u in autresUtilisateurs)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Films" asp-action="AutreUtilisateur"
+                                               asp-route-id="@u.Id">
+                                                @u.UserName
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+
+                            @if (!estAdmin)
+                            {
+                                <!-- Ajout d'un DVD (pas pour l'admin) -->
+                                <li class="nav-item">
+                                    <a class="nav-link @(actionCourante == "Ajouter" ? "active" : "")"
+                                       asp-controller="Films" asp-action="Ajouter"
+                                       title="Ajouter un nouveau DVD">
+                                        Ajouter un DVD
+                                    </a>
+                                </li>
+                            }
+
+                            <!-- Envoi d'un courriel -->
+                            <li class="nav-item">
+                                <a class="nav-link @(actionCourante == "EnvoyerMessage" ? "active" : "")"
+                                   asp-controller="Films" asp-action="EnvoyerMessage"
+                                   title="Envoyer un message à un ou plusieurs utilisateurs">
+                                    Envoyer un courriel
+                                </a>
+                            </li>
+
+                            @if (estAdmin)
+                            {
+                                <!-- Gestion des utilisateurs (remplace Personnalisation pour l'admin) -->
+                                <li class="nav-item">
+                                    <a class="nav-link @(actionCourante == "GestionUtilisateurs" ? "active" : "")"
+                                       asp-controller="Films" asp-action="GestionUtilisateurs"
+                                       title="Gérer les utilisateurs et superutilisateurs">
+                                        Gestion des utilisateurs
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <!-- Personnalisation de l'environnement -->
+                                <li class="nav-item">
+                                    <a class="nav-link @(actionCourante == "Personnalisation" ? "active" : "")"
+                                       asp-controller="Films" asp-action="Personnalisation"
+                                       title="Modifier votre mot de passe et vos préférences">
+                                        Personnalisation
+                                    </a>
+                                </li>
+                            }
+
+                        </ul>
+
+                        <!-- Utilisateur connecté + déconnexion -->
+                        <div class="d-flex align-items-center">
+                            <span class="navbar-text me-3">
+                                Connecté : <strong>@User.Identity!.Name</strong>
+                                @if (estAdmin)
+                                {
+                                    <span class="badge bg-warning text-dark">Admin</span>
+                                }
+                                else if (User.IsInRole("SuperUtilisateur"))
+                                {
+                                    <span class="badge bg-info text-dark">Super</span>
+                                }
+                            </span>
+
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                <button type="submit" class="btn btn-outline-light btn-sm">Déconnexion</button>
+                            </form>
+                        </div>
+
                     </div>
                 }
             </div>
         </nav>
     </header>
-    <div class="container">
+
+    <div class="container contenu">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer-cine">
         <div class="container">&copy; 2026 - Gestion des DVDs</div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -1,0 +1,149 @@
+﻿@model List<ProjetFinalWeb.ViewModels.FilmListeItem>
+
+@{
+    int idChoisi = (int)ViewBag.NoUtilisateurChoisi;
+    string nomChoisi = ViewBag.NomUtilisateurChoisi ?? "";
+    int pageCourante = (int)ViewBag.Page;
+    int nbPages = (int)ViewBag.NbPages;
+    int total = (int)ViewBag.Total;
+    var utilisateurs = (List<ProjetFinalWeb.Models.Utilisateur>)ViewBag.Utilisateurs;
+
+    bool estAdmin = User.IsInRole("Administrateur");
+    bool estSuper = User.IsInRole("SuperUtilisateur");
+
+    ViewData["Title"] = "DVDs de " + nomChoisi;
+}
+
+<h2>DVDs de @nomChoisi</h2>
+
+<div class="row g-2 align-items-end mb-3">
+
+    <div class="col-md-5">
+        <label for="choixUtilisateur" class="form-label">Changer d'utilisateur</label>
+        <select id="choixUtilisateur" class="form-select"
+                title="Choisissez un autre utilisateur pour voir ses DVDs"
+                onchange="if (this.value) window.location.href = this.value;">
+            @foreach (var u in utilisateurs)
+            {
+                <option value="@Url.Action("AutreUtilisateur", "Films", new { id = u.Id })"
+                        selected="@(u.Id == idChoisi)">
+                    @u.UserName
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <a asp-action="Index" class="btn btn-secondary"
+           title="Retourner à la liste de tous les DVDs">
+            Tous les DVDs
+        </a>
+    </div>
+
+</div>
+
+<p class="text-muted">
+    @total DVD(s) — page @pageCourante de @nbPages
+</p>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        @nomChoisi n'a aucun DVD en main.
+    </div>
+}
+else
+{
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+
+        @foreach (var f in Model)
+        {
+            <div class="col">
+                <div class="card h-100 @(f.EstEnMain ? "border-primary" : "")">
+
+                    <img src="@Url.Content(string.IsNullOrEmpty(f.ImagePochette) ? "~/images/pochette-defaut.svg" : f.ImagePochette)"
+                         class="card-img-top pochette"
+                         alt="Pochette de @f.Titre" />
+
+                    <div class="card-body">
+                        <h6 class="card-title">@f.Numero. @f.Titre</h6>
+                    </div>
+
+                    <div class="card-footer d-flex flex-wrap gap-1">
+
+                        <a asp-action="Details"
+                           asp-route-id="@f.NoExemplaire"
+                           class="btn btn-sm btn-outline-secondary"
+                           title="Afficher les données détaillées">
+                            Détails
+                        </a>
+
+                        @if (f.EstEnMain)
+                        {
+                            <a asp-action="Modifier" asp-route-id="@f.NoExemplaire"
+                               class="btn btn-sm btn-outline-primary"
+                               title="Modifier ce DVD">Modifier</a>
+
+                            <a asp-action="Supprimer" asp-route-id="@f.NoExemplaire"
+                               class="btn btn-sm btn-outline-danger"
+                               title="Supprimer ce DVD">Supprimer</a>
+                        }
+                        else
+                        {
+                            @if (!estAdmin)
+                            {
+                                <a asp-action="Courriel" asp-route-id="@f.NoExemplaire"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Envoyer un courriel à @nomChoisi">Courriel</a>
+
+                                <a asp-action="Appropriation" asp-route-id="@f.NoExemplaire"
+                                   class="btn btn-sm btn-outline-success"
+                                   title="Indiquer que vous avez maintenant ce DVD en main">M'approprier</a>
+                            }
+
+                            @if (estAdmin || estSuper)
+                            {
+                                <a asp-action="Modifier" asp-route-id="@f.NoExemplaire"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Modifier ce DVD">Modifier</a>
+
+                                <a asp-action="Supprimer" asp-route-id="@f.NoExemplaire"
+                                   class="btn btn-sm btn-outline-danger"
+                                   title="Supprimer ce DVD">Supprimer</a>
+                            }
+                        }
+
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+
+    @if (nbPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                <li class="page-item @(pageCourante == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="AutreUtilisateur"
+                       asp-route-id="@idChoisi" asp-route-page="@(pageCourante - 1)">Précédent</a>
+                </li>
+
+                @for (int p = 1; p <= nbPages; p++)
+                {
+                    <li class="page-item @(p == pageCourante ? "active" : "")">
+                        <a class="page-link" asp-action="AutreUtilisateur"
+                           asp-route-id="@idChoisi" asp-route-page="@p">@p</a>
+                    </li>
+                }
+
+                <li class="page-item @(pageCourante == nbPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="AutreUtilisateur"
+                       asp-route-id="@idChoisi" asp-route-page="@(pageCourante + 1)">Suivant</a>
+                </li>
+
+            </ul>
+        </nav>
+    }
+}
