@@ -20,7 +20,6 @@ namespace ProjetFinalWeb.Models
 
         public DateTime? DateMAJ { get; set; }
 
-        public int? NoUtilisateurMAJ { get; set; }
 
         [StringLength(500)]
         public string? Resume { get; set; }
@@ -38,19 +37,22 @@ namespace ProjetFinalWeb.Models
 
         [Required(ErrorMessage = "Le titre français est obligatoire.")]
         [StringLength(50)]
-        public string TitreFrancais { get; set; } = "";
+        [Column("Titre")]
+        public string Titre { get; set; } = "";
 
         [StringLength(50)]
         public string? TitreOriginal { get; set; }
 
         public bool? VersionEtendue { get; set; }
 
+        [Column("UtilisateurMAJ")]
+        public int? NoUtilisateurMAJ { get; set; }
+
+        [Column("Realisateur")]
         public int? NoRealisateur { get; set; }
 
+        [Column("Producteur")]
         public int? NoProducteur { get; set; }
-
-        [StringLength(255)]
-        public string? Xtra { get; set; }
 
         // Relations
 

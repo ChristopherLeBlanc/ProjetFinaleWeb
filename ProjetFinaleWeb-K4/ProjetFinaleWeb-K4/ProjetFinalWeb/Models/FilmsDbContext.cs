@@ -1,4 +1,3 @@
-﻿
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -28,11 +27,19 @@ namespace ProjetFinalWeb.Models
         public DbSet<Producteur> Producteurs { get; set; }
         public DbSet<Realisateur> Realisateurs { get; set; }
 
+        public DbSet<Acteur> Acteurs { get; set; }
+        public DbSet<Langue> Langues { get; set; }
+        public DbSet<SousTitre> SousTitres { get; set; }
+        public DbSet<Supplement> Supplements { get; set; }
+        public DbSet<FilmActeur> FilmsActeurs { get; set; }
+        public DbSet<FilmLangue> FilmsLangues { get; set; }
+        public DbSet<FilmSousTitre> FilmsSousTitres { get; set; }
+        public DbSet<FilmSupplement> FilmsSupplements { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // UTILISATEUR
             modelBuilder.Entity<Utilisateur>(entity =>
             {
                 entity.ToTable("Utilisateurs");
@@ -61,21 +68,18 @@ namespace ProjetFinalWeb.Models
                     .HasForeignKey(u => u.TypeUtilisateur);
             });
 
-            // TYPE UTILISATEUR
             modelBuilder.Entity<TypeUtilisateur>(entity =>
             {
                 entity.ToTable("TypesUtilisateur");
                 entity.HasKey(t => t.Type);
             });
 
-            // PREFERENCE
             modelBuilder.Entity<Preference>(entity =>
             {
                 entity.ToTable("Preferences");
                 entity.HasKey(p => p.NoPreference);
             });
 
-            // UTILISATEURS PREFERENCES
             modelBuilder.Entity<UtilisateursPreference>(entity =>
             {
                 entity.ToTable("UtilisateursPreferences");
@@ -95,7 +99,6 @@ namespace ProjetFinalWeb.Models
                     .HasForeignKey(up => up.NoPreference);
             });
 
-            // VALEURS PREFERENCES
             modelBuilder.Entity<ValeurPreference>(entity =>
             {
                 entity.ToTable("ValeursPreferences");
@@ -115,44 +118,61 @@ namespace ProjetFinalWeb.Models
                     .HasForeignKey(vp => vp.NoPreference);
             });
 
-            // CATEGORIES
             modelBuilder.Entity<Categorie>(entity =>
             {
                 entity.ToTable("Categories");
                 entity.HasKey(c => c.NoCategorie);
             });
 
-            // FORMATS
             modelBuilder.Entity<Format>(entity =>
             {
                 entity.ToTable("Formats");
                 entity.HasKey(f => f.NoFormat);
             });
 
-            // PRODUCTEURS
             modelBuilder.Entity<Producteur>(entity =>
             {
                 entity.ToTable("Producteurs");
                 entity.HasKey(p => p.NoProducteur);
             });
 
-            // REALISATEURS
             modelBuilder.Entity<Realisateur>(entity =>
             {
                 entity.ToTable("Realisateurs");
                 entity.HasKey(r => r.NoRealisateur);
             });
 
-            // FILMS
+            modelBuilder.Entity<Acteur>(entity =>
+            {
+                entity.ToTable("Acteurs", t =>
+                    t.HasCheckConstraint("CK_Acteurs_Sexe",
+                        "[Sexe] IN (N'F', N'H', N'N')"));
+                entity.HasKey(a => a.NoActeur);
+            });
+
+            modelBuilder.Entity<Langue>(entity =>
+            {
+                entity.ToTable("Langues");
+                entity.HasKey(l => l.NoLangue);
+            });
+
+            modelBuilder.Entity<SousTitre>(entity =>
+            {
+                entity.ToTable("SousTitres");
+                entity.HasKey(s => s.NoSousTitre);
+            });
+
+            modelBuilder.Entity<Supplement>(entity =>
+            {
+                entity.ToTable("Supplements");
+                entity.HasKey(s => s.NoSupplement);
+            });
+
             modelBuilder.Entity<Film>(entity =>
             {
                 entity.ToTable("Films");
 
                 entity.HasKey(f => f.NoFilm);
-
-                // Correspondance des colonnes SQL
-                entity.Property(f => f.TitreFrancais)
-                    .HasColumnName("Titre");
 
                 entity.Property(f => f.NoProducteur)
                     .HasColumnName("Producteur");
@@ -163,38 +183,33 @@ namespace ProjetFinalWeb.Models
                 entity.Property(f => f.NoUtilisateurMAJ)
                     .HasColumnName("UtilisateurMAJ");
 
-                // La colonne Xtra n'existe pas dans la structure actuelle
-                entity.Ignore(f => f.Xtra);
-
-                // RELATION CATEGORIE
                 entity.HasOne(f => f.CategorieInfo)
                     .WithMany()
                     .HasForeignKey(f => f.Categorie)
                     .HasPrincipalKey(c => c.NoCategorie)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // RELATION FORMAT
+
+
+
                 entity.HasOne(f => f.FormatInfo)
                     .WithMany()
                     .HasForeignKey(f => f.Format)
                     .HasPrincipalKey(f => f.NoFormat)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // RELATION PRODUCTEUR
                 entity.HasOne(f => f.Producteur)
                     .WithMany()
                     .HasForeignKey(f => f.NoProducteur)
                     .HasPrincipalKey(p => p.NoProducteur)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // RELATION REALISATEUR
                 entity.HasOne(f => f.Realisateur)
                     .WithMany()
                     .HasForeignKey(f => f.NoRealisateur)
                     .HasPrincipalKey(r => r.NoRealisateur)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // RELATION UTILISATEUR
                 entity.HasOne(f => f.UtilisateurMAJ)
                     .WithMany()
                     .HasForeignKey(f => f.NoUtilisateurMAJ)
@@ -202,7 +217,70 @@ namespace ProjetFinalWeb.Models
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // EXEMPLAIRES
+            modelBuilder.Entity<FilmActeur>(entity =>
+            {
+                entity.ToTable("FilmsActeurs");
+                entity.HasKey(fa => new { fa.NoFilm, fa.NoActeur });
+
+                entity.HasOne(fa => fa.Film)
+                    .WithMany()
+                    .HasForeignKey(fa => fa.NoFilm)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(fa => fa.Acteur)
+                    .WithMany(a => a.FilmsActeurs)
+                    .HasForeignKey(fa => fa.NoActeur)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<FilmLangue>(entity =>
+            {
+                entity.ToTable("FilmsLangues");
+                entity.HasKey(fl => new { fl.NoFilm, fl.NoLangue });
+
+                entity.HasOne(fl => fl.Film)
+                    .WithMany()
+                    .HasForeignKey(fl => fl.NoFilm)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(fl => fl.Langue)
+                    .WithMany(l => l.FilmsLangues)
+                    .HasForeignKey(fl => fl.NoLangue)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<FilmSousTitre>(entity =>
+            {
+                entity.ToTable("FilmsSousTitres");
+                entity.HasKey(fs => new { fs.NoFilm, fs.NoSousTitre });
+
+                entity.HasOne(fs => fs.Film)
+                    .WithMany()
+                    .HasForeignKey(fs => fs.NoFilm)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(fs => fs.SousTitre)
+                    .WithMany(s => s.FilmsSousTitres)
+                    .HasForeignKey(fs => fs.NoSousTitre)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<FilmSupplement>(entity =>
+            {
+                entity.ToTable("FilmsSupplements");
+                entity.HasKey(fs => new { fs.NoFilm, fs.NoSupplement });
+
+                entity.HasOne(fs => fs.Film)
+                    .WithMany()
+                    .HasForeignKey(fs => fs.NoFilm)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(fs => fs.Supplement)
+                    .WithMany(s => s.FilmsSupplements)
+                    .HasForeignKey(fs => fs.NoSupplement)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
             modelBuilder.Entity<Exemplaire>(entity =>
             {
                 entity.ToTable("Exemplaires");
@@ -214,7 +292,6 @@ namespace ProjetFinalWeb.Models
                     .HasForeignKey(e => e.NoUtilisateurProprietaire);
             });
 
-            // EMPRUNTS FILMS
             modelBuilder.Entity<EmpruntFilm>(entity =>
             {
                 entity.ToTable("EmpruntsFilms");
@@ -231,7 +308,8 @@ namespace ProjetFinalWeb.Models
 
                 entity.HasOne(e => e.Utilisateur)
                     .WithMany()
-                    .HasForeignKey(e => e.NoUtilisateur);
+                    .HasForeignKey(e => e.NoUtilisateur)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

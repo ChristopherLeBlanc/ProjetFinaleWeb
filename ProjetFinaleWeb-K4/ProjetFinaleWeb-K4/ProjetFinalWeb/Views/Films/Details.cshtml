@@ -1,0 +1,86 @@
+﻿@model ProjetFinalWeb.Models.Film
+
+@{
+    ViewData["Title"] = "Détails du DVD";
+}
+
+<h2>Détails du DVD</h2>
+
+<div class="card shadow-sm p-4">
+
+    <div class="row">
+
+        <div class="col-md-4">
+
+            @if (!string.IsNullOrEmpty(Model.ImagePochette))
+            {
+                <img src="@Model.ImagePochette"
+                     class="img-fluid rounded"
+                     alt="@Model.Titre" />
+            }
+
+        </div>
+
+        <div class="col-md-8">
+
+            <h3>@Model.Titre</h3>
+
+            @if (!string.IsNullOrEmpty(Model.TitreOriginal))
+            {
+                <p>
+                    <strong>Titre original :</strong>
+                    @Model.TitreOriginal
+                </p>
+            }
+
+            <p>
+                <strong>Numéro du DVD :</strong>
+                @ViewBag.NoExemplaire
+            </p>
+
+            <p>
+                <strong>Année de sortie :</strong>
+                @(Model.AnneeSortie?.ToString() ?? "Non renseignée")
+            </p>
+
+            <p>
+                <strong>Durée :</strong>
+                @(Model.DureeMinutes.HasValue
+                    ? Model.DureeMinutes + " minutes"
+                    : "Non renseignée")
+            </p>
+
+            <p>
+                <strong>Nombre de disques :</strong>
+                @(Model.NbDisques?.ToString() ?? "Non renseigné")
+            </p>
+
+            <p>
+                <strong>Résumé :</strong>
+                @(Model.Resume ?? "Aucun résumé disponible")
+            </p>
+
+            <hr />
+
+            <h5>Détenteur actuel</h5>
+
+            @if (ViewBag.Detenteur != null)
+            {
+                <p>
+                    <strong>Utilisateur :</strong>
+                    @ViewBag.Detenteur.UserName
+                </p>
+            }
+
+        </div>
+
+    </div>
+
+    <hr />
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Retour à la liste
+    </a>
+
+</div>
